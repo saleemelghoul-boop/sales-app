@@ -119,8 +119,30 @@ class SupabaseDatabase {
     return true
   }
 
-  // باقي الدوال مثل getProductGroups, getProducts, getCustomers, getOrders, إلخ
-  // تقدر تنسخ نفس النمط وتعدل window.supabase إلى supabase
+  // ✳️ الدالة الجديدة لتفادي الخطأ
+  async initializeDefaultData(): Promise<void> {
+    console.log("[v0] 🧪 تهيئة البيانات الافتراضية")
+
+    try {
+      // مثال: إنشاء مدير افتراضي إذا لم يكن موجود
+      const { data: users } = await supabase.from("users").select("*").eq("role", "admin").limit(1)
+
+      if (!users || users.length === 0) {
+        const adminUser: Omit<User, "id" | "created_at"> = {
+          username: "admin",
+          password: "admin123",
+          full_name: "Default Admin",
+          role: "admin",
+          is_active: true,
+          admin_permission: "full",
+        }
+        await this.addUser(adminUser)
+        console.log("[v0] ✅ تم إنشاء مدير افتراضي")
+      }
+    } catch (error) {
+      console.error("❌ خطأ في تهيئة البيانات الافتراضية:", error)
+    }
+  }
 }
 
 export const db = new SupabaseDatabase()
