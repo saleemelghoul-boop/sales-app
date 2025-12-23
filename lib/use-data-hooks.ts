@@ -122,3 +122,23 @@ export function useNotifications(userId: string) {
 
   return { notifications, loading, refresh }
 }
+
+// 🟢 الدالة الجديدة لجلب المندوبين فقط
+export function useSalesReps() {
+  const [salesReps, setSalesReps] = useState<User[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const refresh = async () => {
+    setLoading(true)
+    const users = await db.getUsers()
+    const reps = users.filter((u) => u.role === "sales_rep")
+    setSalesReps(reps)
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    refresh()
+  }, [])
+
+  return { salesReps, loading, refresh }
+}
