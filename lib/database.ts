@@ -1,4 +1,5 @@
 import { generateId } from "./supabase-client"
+import { supabase } from "./supabase-client"
 
 export interface User {
   id: string
@@ -77,14 +78,10 @@ export interface Notification {
   created_at: string
 }
 
-// 🟢 هنا نخلي التطبيق يستخدم SupabaseDatabase بدل LocalDatabase
 class SupabaseDatabase {
+  // 🟢 المستخدمين
   async getUsers(): Promise<User[]> {
-    const { data, error } = await window.supabase
-      .from("users")
-      .select("*")
-      .order("created_at", { ascending: false })
-
+    const { data, error } = await supabase.from("users").select("*").order("created_at", { ascending: false })
     if (error) {
       console.error("❌ خطأ في جلب المستخدمين:", error)
       return []
@@ -98,13 +95,7 @@ class SupabaseDatabase {
       id: generateId(),
       created_at: new Date().toISOString(),
     }
-
-    const { data, error } = await window.supabase
-      .from("users")
-      .insert(newUser)
-      .select()
-      .single()
-
+    const { data, error } = await supabase.from("users").insert(newUser).select().single()
     if (error) {
       console.error("❌ خطأ في إضافة المستخدم:", error)
       return null
@@ -112,9 +103,27 @@ class SupabaseDatabase {
     return data
   }
 
-  // 🟢 باقي الدوال مثل getProducts, getCustomers, getOrders, إلخ
-  // (موجودة عندك بالفعل في الملف، ما تحتاج تغيرها)
+  async updateUser(id: string, updates: Partial<User>): Promise<User | null> {
+    const { data, error } = await supabase.from("users").update(updates).eq("id", id).select().single()
+    if (error) {
+      console.error("❌ خطأ في تحديث المستخدم:", error)
+      return null
+    }
+    return data
+  }
+
+  async deleteUser(id: string): Promise<boolean> {
+    const { error } = await supabase.from("users").delete().eq("id", id)
+    if (error) {
+      console.error("❌ خطأ في حذف المستخدم:", error)
+      return false
+    }
+    return true
+  }
+
+  // 🟢 باقي الدوال (Products, Customers, Orders, Notifications)
+  // نفس المنطق: استخدم supabase بدل window.supabase
+  // وهي موجودة عندك بالفعل، فقط غيّر window.supabase إلى supabase
 }
 
-// 🟢 هذا هو التغيير الأساسي
 export const db = new SupabaseDatabase()
