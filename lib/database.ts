@@ -1,5 +1,4 @@
-import { generateId } from "./supabase-client"
-import { supabase } from "./supabase-client"
+import { generateId, supabase } from "./supabase-client"
 
 export interface User {
   id: string
@@ -79,7 +78,6 @@ export interface Notification {
 }
 
 class SupabaseDatabase {
-  // 🟢 المستخدمين
   async getUsers(): Promise<User[]> {
     const { data, error } = await supabase.from("users").select("*").order("created_at", { ascending: false })
     if (error) {
@@ -121,9 +119,8 @@ class SupabaseDatabase {
     return true
   }
 
-  // 🟢 باقي الدوال (Products, Customers, Orders, Notifications)
-  // نفس المنطق: استخدم supabase بدل window.supabase
-  // وهي موجودة عندك بالفعل، فقط غيّر window.supabase إلى supabase
+  // باقي الدوال مثل getProductGroups, getProducts, getCustomers, getOrders, إلخ
+  // تقدر تنسخ نفس النمط وتعدل window.supabase إلى supabase
 }
 
 export const db = new SupabaseDatabase()
